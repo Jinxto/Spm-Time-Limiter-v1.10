@@ -1,0 +1,3 @@
+name: spm-time-limiter
+main: plugin.timeLimiter.java
+version: 1.0
