@@ -1,0 +1,12 @@
+name: spm-time-limiter
+main: plugin.timeLimiter
+version: 1.0
+description: A test plugin
+load: POSTWORLD
+author: jinxto
+website: spigotmc.org
+prefix: Testing 
+commands:
+  spm:
+    description: See how many days left before spm
+    usage: /<command>
