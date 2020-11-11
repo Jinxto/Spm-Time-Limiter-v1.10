@@ -122,7 +122,7 @@ public final class timeLimiter  extends JavaPlugin implements Listener, CommandE
 		    	  
 		       
 		       }
-		   }.runTaskTimer(this, 20L, 20L); //Delays in ticks
+		   }.runTaskTimer(this, 200L, 200L); //Delays in ticks
 	
 	 
 		
@@ -175,7 +175,7 @@ public final class timeLimiter  extends JavaPlugin implements Listener, CommandE
 			playerGameTime.add((long) 0);
 			
 			if(before= true) {
-		    customTime.add((long) 3600);
+		    customTime.add((long) 36000);
 			DisconnectedBefore.add(false);
 			playerGametempTime.add((long) 0);
 			}
@@ -361,7 +361,7 @@ public final class timeLimiter  extends JavaPlugin implements Listener, CommandE
 	   						if(((Player) sender).getPlayer().getDisplayName()== playerJoin.get(commande)) {
 	   							customTime.set(commande, (long) 144000);
 	   							System.out.println("Limiting game time for 2-hour");
-	   							sender.sendMessage(ChatColor.YELLOW+"Limiting game time for 1-hour."+" "+ChatColor.BLUE+"Doing this frequently isn't a wise choice!");
+	   							sender.sendMessage(ChatColor.YELLOW+"Limiting game time for 2-hour."+" "+ChatColor.BLUE+"Doing this frequently isn't a wise choice!");
 	   						}
 	   						
 	   		}
@@ -382,11 +382,11 @@ public final class timeLimiter  extends JavaPlugin implements Listener, CommandE
 	   						if(((Player) sender).getPlayer().getDisplayName()== playerJoin.get(commande)) {
 	   							Long temp =(customTime.get(commande)/(20*60*60));
 	   							Long minuto = (long) 0;
-	   							if(temp==0) {
-	   								minuto =  (customTime.get(commande/(20*60)));
-	   								sender.sendMessage("Your custom time is"+ temp+" hours"+minuto+" minutes");
+	   							if(temp<1) {
+	   								minuto =  (customTime.get(commande)/(20*60));
+	   								sender.sendMessage("Your custom time is "+ temp+" hours "+minuto+" minutes");
 	   							}
-	   							sender.sendMessage("Your custom time is"+ temp+" hours"+minuto+" minutes");
+	   							
 	   						}
 	   							
 	   		
@@ -398,6 +398,8 @@ public final class timeLimiter  extends JavaPlugin implements Listener, CommandE
 	   							sender.sendMessage(ChatColor.BLUE+"----------------------------------------------------------");
 	   							sender.sendMessage(ChatColor.YELLOW+"/counter default, n-hour, n = 1,2,3,"+" "+ChatColor.RED+"Max 3 hours"+" "+ChatColor.GREEN+"Default 30 minutes (autoEnable)");
 	   							sender.sendMessage(ChatColor.YELLOW+"/spm counter"+" " +ChatColor.GREEN+"Returns number of days before spm");
+	   							sender.sendMessage(ChatColor.YELLOW+"/counter getTime"+" " +ChatColor.GREEN+"Returns the custom time set");
+	   							sender.sendMessage(ChatColor.YELLOW+"/counter gameTime"+" " +ChatColor.GREEN+"Returns current gameTime");
 	   							sender.sendMessage(ChatColor.BLUE+"----------------------------------------------------------");
 	   						}
 	   							
@@ -410,6 +412,25 @@ public final class timeLimiter  extends JavaPlugin implements Listener, CommandE
 	   							customTime.set(commande, (long) 36000);
 	   							System.out.println("Setting default time-limit which is 30 minutes");
 	   							sender.sendMessage(ChatColor.GREEN+"Limiting game time to 30 minutes very wise!");
+	   						}
+	   							
+	   		
+	   					}
+	   				}
+	   				if(args[0].equals("gameTime")) {
+	   					for(int commande = 0; commande<i; commande++) {
+	   						if(((Player) sender).getPlayer().getDisplayName()== playerJoin.get(commande)) {
+	   							Long j = (playerGameTime.get(commande)/(20*60*60));
+	   						    Long ee =(long)0;
+	   							Long lolo = (long) 0;
+	   							if(j<1) {
+	   								lolo =  (playerGameTime.get(commande)/(20*60));
+	   								if(lolo<1) {
+	   									ee = playerGameTime.get(commande)/20;
+	   								}
+	   								sender.sendMessage("Your game time is "+ j+" hours "+lolo+" minutes "+ee+" seconds");
+	   							}
+	   							
 	   						}
 	   							
 	   		
