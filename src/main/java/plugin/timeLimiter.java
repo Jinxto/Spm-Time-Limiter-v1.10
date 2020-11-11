@@ -421,11 +421,15 @@ public final class timeLimiter  extends JavaPlugin implements Listener, CommandE
 	   					for(int commande = 0; commande<i; commande++) {
 	   						if(((Player) sender).getPlayer().getDisplayName()== playerJoin.get(commande)) {
 	   							Long j = (playerGameTime.get(commande)/(20*60*60));
+	   							Long l = (playerGameTime.get(commande)%(20*60*60));
 	   						    Long ee =(long)0;
 	   							Long lolo = (long) 0;
-	   							if(j<1) {
+	   							Long popo = (long)0;
+	   							
+	   							if(l!=0) {
 	   								lolo =  (playerGameTime.get(commande)/(20*60));
-	   								if(lolo<1) {
+	   								popo =  (playerGameTime.get(commande)%(20*60));
+	   								if(popo!=0) {
 	   									ee = playerGameTime.get(commande)/20;
 	   								}
 	   								sender.sendMessage("Your game time is "+ j+" hours "+lolo+" minutes "+ee+" seconds");
