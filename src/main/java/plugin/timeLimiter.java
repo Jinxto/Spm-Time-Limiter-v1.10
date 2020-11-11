@@ -16,8 +16,9 @@ import org.bukkit.BanList;
 import org.bukkit.BanList.Type;
 import org.bukkit.Bukkit;
 import org.bukkit.Server;
-
-
+import org.bukkit.command.Command;
+import org.bukkit.command.CommandExecutor;
+import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -34,7 +35,7 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 
 //only for setting up server stugg
-public final class timeLimiter  extends JavaPlugin implements Listener{
+public final class timeLimiter  extends JavaPlugin implements Listener, CommandExecutor{
 	    int i;  //for event handler connected
 	    int j; //for event handler disconnected
 	    boolean k;
@@ -53,6 +54,9 @@ public final class timeLimiter  extends JavaPlugin implements Listener{
 		ArrayList<Long>playerQuitGameTime= new ArrayList<Long>();
 	    ArrayList<String>playerQuit = new ArrayList<String>();
 	    ArrayList<Boolean>DisconnectedBefore = new ArrayList<Boolean>();
+	    ArrayList<Long>playerGametempTime= new ArrayList<Long>();
+	    ArrayList<Long>customTime= new ArrayList<Long>();
+	    ArrayList<Long>playerQuitCustomTime= new ArrayList<Long>();
 	    protected File customConfigFile;
 	    protected FileConfiguration customConfig;
 		 
@@ -79,8 +83,10 @@ public final class timeLimiter  extends JavaPlugin implements Listener{
 			 System.out.println("moving data.....");
 			 for(int confug =0; confug<x; confug++) {
 			playerQuit.add((String) customConfig.get("playerQuit"+confug));
+			Long customo =((Number)customConfig.get("playerQuitCustomTime"+confug)).longValue();
 			Long tempe= ((Number)customConfig.get("playerQuitGameTime"+confug)).longValue(); //((Number) obj.get("ipInt")).longValue();
 			playerQuitGameTime.add(tempe);
+			playerQuitCustomTime.add(customo);
 			 } 
 				 
 			 }
@@ -92,6 +98,7 @@ public final class timeLimiter  extends JavaPlugin implements Listener{
 		  for(int reset=0; reset<x; reset++) {
 				customConfig.set("playerQuit"+reset, null);
 				customConfig.set("playerQuitGameTime"+reset, null);
+				customConfig.set("playerQuitCustomTime"+reset, null);
 				
 			}
 			 try {
@@ -103,6 +110,7 @@ public final class timeLimiter  extends JavaPlugin implements Listener{
 		 }
 	//	getServer().getPluginManager().registerEvents(new events(), this);
 		  getCommand("spm").setExecutor(new commando());
+		  getCommand("counter").setExecutor(this);
 		  getServer().getPluginManager().registerEvents(this, this);
 		
 		 new BukkitRunnable() {
@@ -114,7 +122,7 @@ public final class timeLimiter  extends JavaPlugin implements Listener{
 		    	  
 		       
 		       }
-		   }.runTaskTimer(this, 1200L, 1200L); //Delays in ticks
+		   }.runTaskTimer(this, 20L, 20L); //Delays in ticks
 	
 	 
 		
@@ -128,6 +136,7 @@ public final class timeLimiter  extends JavaPlugin implements Listener{
 	    }
 	  @EventHandler
 		public void onPlayerjoin(PlayerJoinEvent e) {
+		Boolean before = true;
 			
 		   playerJoinTemp = e.getPlayer().getDisplayName();
 		 
@@ -144,29 +153,42 @@ public final class timeLimiter  extends JavaPlugin implements Listener{
 				
 				if(playerJoinTemp.equals(playerComparing)) {
 					
-					playerGameTime.add(playerQuitGameTime.get(op));
+				
+					playerGametempTime.add(playerQuitGameTime.get(op));
+					customTime.add(playerQuitCustomTime.get(op));
 					playerQuit.remove(op);
 					playerQuitGameTime.remove(op);
 					j--;
 					System.out.println("someone joined before");
 					DisconnectedBefore.add(true);
+					before = false;
 					
 					
 					
 				} 
 			}
+			// default
 			playerdata.add(e.getPlayer());
 			System.out.println("spm candidate"+" "+e.getPlayer());
 			playerJoin.add(e.getPlayer().getDisplayName());
 			playerTime.add(e.getPlayer().getPlayerTime());
-			playerGameTime.add(e.getPlayer().getPlayerTime());
-			DisconnectedBefore.add(false);//set so that i can get it in the index section
+			playerGameTime.add((long) 0);
+			
+			if(before= true) {
+		    customTime.add((long) 3600);
+			DisconnectedBefore.add(false);
+			playerGametempTime.add((long) 0);
+			}
+				
+			
+			
+			//set so that i can get it in the index section
 			//size
 			i++;
 			System.out.println("Number of users"+" "+i);
 			System.out.println("Number of left"+" "+j);
 			System.out.println("User "+ e.getPlayer().getDisplayName()+" join at  "+ UserJoinedTime);
-		    e.setJoinMessage(ChatColor.GREEN+"Welcome to"+ChatColor.GOLD+" The_Noob's server!"+" "+"and"+ChatColor.UNDERLINE+" SPM "+"is"+" "+ChatColor.RED+spm+" "+ChatColor.ITALIC+"days left! "+ChatColor.BLUE+"Mr "+ChatColor.BOLD+ playerJoin.get(i-1)+" "+"type /spm to see how many days spm left");
+		    e.getPlayer().sendMessage(ChatColor.GREEN+"Welcome to"+ChatColor.GOLD+" The_Noob's server!"+" "+"and"+ChatColor.UNDERLINE+" SPM "+"is"+" "+ChatColor.RED+spm+" "+ChatColor.ITALIC+"days left! "+ChatColor.BLUE+"Mr "+ChatColor.BOLD+ playerJoin.get(i-1)+" "+"type /counter help to view the commands");
 	       
 			
 	}
@@ -184,6 +206,7 @@ public final class timeLimiter  extends JavaPlugin implements Listener{
 		    			
 		    			playerQuit.add(quit);
 		    			playerQuitGameTime.add(playerGameTime.get(pop));
+		    			playerQuitCustomTime.add(customTime.get(pop));
 		    			j++;
 		    			
 		    			
@@ -192,6 +215,9 @@ public final class timeLimiter  extends JavaPlugin implements Listener{
 		    			playerdata.remove(pop);
 		    		    playerTime.remove(pop);
 		    		    DisconnectedBefore.remove(pop);
+		    		    playerGametempTime.remove(pop);
+		    		    customTime.remove(pop);
+		    		    
 		    			
 		    			
 		    			i--;
@@ -225,6 +251,8 @@ public final class timeLimiter  extends JavaPlugin implements Listener{
 		    			playerdata.remove(pop);
 		    		    playerTime.remove(pop);
 		    		    DisconnectedBefore.remove(pop);
+		    		    playerGametempTime.remove(pop);
+		    		    customTime.remove(pop);
 		    		    System.out.println(playerGameTime.get(pop) +" banned "+DisconnectedBefore.get(pop));
 		    		    i--;
 		    		    
@@ -233,20 +261,47 @@ public final class timeLimiter  extends JavaPlugin implements Listener{
   }
 	   }
 	    public void timeComparingInitializer() {
-	    
+	        x = true;
 	    	k = false;
 	    	for(Player p : Bukkit.getServer().getOnlinePlayers()) {
 	    	for(int q=0; q<i; q++) {
 	    		System.out.println("calculating....");
 	    		if(playerJoin.get(q)==p.getPlayer().getDisplayName()) {
 	    			long comparing = 0;
+	    			long warning = 0;
 	    			if(x= DisconnectedBefore.get(q)) {
-	    				comparing+= playerTime.get(q);
+	    				comparing+= playerGametempTime.get(q);
+	    				
 	    			}
-	    			comparing += p.getPlayer().getPlayerTime() -playerTime.get(q);
-	    			System.out.println(playerJoin.get(q)+" has a game time of "+comparing);
-	    			playerGameTime.set(q, comparing);
-	    			if(playerGameTime.get(q)>=36000) {
+	    			
+	    				comparing += p.getPlayer().getPlayerTime()-playerTime.get(q);
+		    			System.out.println(playerJoin.get(q)+" has a game time of "+comparing);
+		    			playerGameTime.set(q, comparing);
+	    			
+		    		 warning = customTime.get(q)- playerGameTime.get(q);
+		    		 if(warning == 216000) {
+		    			 p.getPlayer().sendMessage(ChatColor.GREEN+"You have"+" "+ChatColor.GREEN+"3 hours left before ban");
+		    		 }
+		    		 if(warning == 144000) {
+		    			 p.getPlayer().sendMessage(ChatColor.GREEN+"You have"+" "+ChatColor.GREEN+"2 hours left before ban");
+		    		 }
+		    		 if(warning == 72000){
+		    			 p.getPlayer().sendMessage(ChatColor.GREEN+"You have"+" "+ChatColor.GREEN+"1 hours left before ban");
+		    		 }
+		    		 if(warning == 36000){
+		    			 p.getPlayer().sendMessage(ChatColor.GREEN+"You have"+" "+ChatColor.GREEN+"30 minutes left before ban");
+		    		 }
+		    		 if(warning == 12000) {
+		    			 p.getPlayer().sendMessage(ChatColor.GREEN+"You have"+" "+ChatColor.YELLOW+"10 minutes left before ban");
+		    		 }
+		    		 if(warning == 6000) {
+		    			 p.getPlayer().sendMessage(ChatColor.GREEN+"You have"+" "+ChatColor.RED+"5 minutes left before ban");
+		    		 }
+		    		 if(warning == 200){
+		    			 p.getPlayer().sendMessage(ChatColor.GREEN+"You have"+" "+ChatColor.RED+ChatColor.BOLD+"10 seconds left before ban");
+		    		 }
+	    			
+	    			if(playerGameTime.get(q)>=customTime.get(q)) {
 	    				System.out.println("Game Time Reached for User"+" "+p.getPlayer().getDisplayName()+" "+", intializing ban");
 	    				
 	    				banName(p.getPlayer().getDisplayName(),ChatColor.MAGIC+"asdasdasdasd"+" "+ChatColor.GREEN+"Im sorry to say that you need to go back to study because"+" "+ChatColor.BOLD+"SPM"+" is "+" "+ChatColor.RED+spm+" "+ChatColor.AQUA+"days left!"+" "+ChatColor.GOLD+"come back tommorrow!",playerJoin.get(q)+""+ChatColor.MAGIC+" asdasdasdasdasdasdasda");
@@ -283,6 +338,89 @@ public final class timeLimiter  extends JavaPlugin implements Listener{
 	   public int getSpm() {
 		   return spm;
 	   }
+	   @Override
+	   public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+	   	if (sender instanceof Player) {
+	   		////////////////////////////////////////////////////////
+	   			if(args.length >0) {
+	   				if(args[0].equals("1-hour")) {
+	   					for(int commande = 0; commande<i; commande++) {
+	   						if(((Player) sender).getPlayer().getDisplayName()== playerJoin.get(commande)) {
+	   							customTime.set(commande, (long) 72000); //very inefficient
+	   							System.out.println("Limiting game time for 1-hour");
+	   						   sender.sendMessage(ChatColor.GREEN+"Limiting game time for 1-hour");
+	   						}
+	   				
+	   					}
+	   					
+	   				
+	   			
+	   				}
+	   				if(args[0].equals("2-hour")) {
+	   					for(int commande = 0; commande<i; commande++) {
+	   						if(((Player) sender).getPlayer().getDisplayName()== playerJoin.get(commande)) {
+	   							customTime.set(commande, (long) 144000);
+	   							System.out.println("Limiting game time for 2-hour");
+	   							sender.sendMessage(ChatColor.YELLOW+"Limiting game time for 1-hour."+" "+ChatColor.BLUE+"Doing this frequently isn't a wise choice!");
+	   						}
+	   						
+	   		}
+	   		}
+	   				if(args[0].equals("3-hour")) {
+	   					for(int commande = 0; commande<i; commande++) {
+	   						if(((Player) sender).getPlayer().getDisplayName()== playerJoin.get(commande)) {
+	   							customTime.set(commande, (long) 216000);
+	   							System.out.println("setting time for 1hour");
+	   							sender.sendMessage(ChatColor.RED+"Limiting game time for 3-hour."+" "+ChatColor.RED+"Do you know what you're doing? 3 hour is too much!");
+	   				}
+	   						
+	   						
+	   	   }
+	   }
+	   				if(args[0].equals("getTime")) {
+	   					for(int commande = 0; commande<i; commande++) {
+	   						if(((Player) sender).getPlayer().getDisplayName()== playerJoin.get(commande)) {
+	   							Long temp =(customTime.get(commande)/(20*60*60));
+	   							Long minuto = (long) 0;
+	   							if(temp==0) {
+	   								minuto =  (customTime.get(commande/(20*60)));
+	   								sender.sendMessage("Your custom time is"+ temp+" hours"+minuto+" minutes");
+	   							}
+	   							sender.sendMessage("Your custom time is"+ temp+" hours"+minuto+" minutes");
+	   						}
+	   							
+	   		
+	   					}
+	   				}
+	   				if(args[0].equals("help")) {
+	   					for(int commande = 0; commande<i; commande++) {
+	   						if(((Player) sender).getPlayer().getDisplayName()== playerJoin.get(commande)) {
+	   							sender.sendMessage(ChatColor.BLUE+"----------------------------------------------------------");
+	   							sender.sendMessage(ChatColor.YELLOW+"/counter default, n-hour, n = 1,2,3,"+" "+ChatColor.RED+"Max 3 hours"+" "+ChatColor.GREEN+"Default 30 minutes (autoEnable)");
+	   							sender.sendMessage(ChatColor.YELLOW+"/spm counter"+" " +ChatColor.GREEN+"Returns number of days before spm");
+	   							sender.sendMessage(ChatColor.BLUE+"----------------------------------------------------------");
+	   						}
+	   							
+	   		
+	   					}
+	   				}
+	   				if(args[0].equals("default")) {
+	   					for(int commande = 0; commande<i; commande++) {
+	   						if(((Player) sender).getPlayer().getDisplayName()== playerJoin.get(commande)) {
+	   							customTime.set(commande, (long) 36000);
+	   							System.out.println("Setting default time-limit which is 30 minutes");
+	   							sender.sendMessage(ChatColor.GREEN+"Limiting game time to 30 minutes very wise!");
+	   						}
+	   							
+	   		
+	   					}
+	   				}
+	 
+	     }
+	   	}
+	   	////////////////////////////////////////////////////////////
+	    return false;
+	 }
 	   
 	    @Override   //need to save date too btw
 	    public void onDisable() {
@@ -292,6 +430,7 @@ public final class timeLimiter  extends JavaPlugin implements Listener{
 	    	for(int cfg=0; cfg<j; cfg++) {
 				customConfig.set("playerQuit"+cfg, playerQuit.get(cfg));
 				customConfig.set("playerQuitGameTime"+cfg, playerQuitGameTime.get(cfg));
+				customConfig.set("playerQuitCustomTime"+cfg, playerQuitCustomTime.get(cfg));
 			}
 	    	 try {
 					customConfig.save(customConfigFile);

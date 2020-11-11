@@ -8,5 +8,7 @@ website: spigotmc.org
 prefix: Testing 
 commands:
   spm:
-    description: See how many days left before spm
-    usage: /<command>
+    description: See how many days left before spm  
+  counter:
+    description: set custom time for your time-limiter
+     
