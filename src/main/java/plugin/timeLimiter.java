@@ -4,16 +4,16 @@ package plugin;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.InetSocketAddress;
+
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.UUID;
+
 
 import org.bukkit.BanList;
-import org.bukkit.BanList.Type;
+
 import org.bukkit.Bukkit;
 import org.bukkit.Server;
 import org.bukkit.command.Command;
@@ -40,7 +40,7 @@ public final class timeLimiter  extends JavaPlugin implements Listener, CommandE
 	    int j; //for event handler disconnected
 	    boolean k;
 		String quit;
-		boolean x;
+		boolean before;
 		int temp;
 		int temporarycomparin;
 		String playerJoinTemp;
@@ -48,15 +48,14 @@ public final class timeLimiter  extends JavaPlugin implements Listener, CommandE
 		double tempspm = ((737747.8334) -((calendar.get(Calendar.YEAR)*365)+((calendar.get(Calendar.MONTH)+1)*30.4167)+(calendar.get(Calendar.DATE))));
 		int spm;
 		ArrayList<String>playerJoin = new ArrayList<String>();
-		ArrayList<Player>playerdata=  new ArrayList<Player>();
 		ArrayList<Integer>playerTime= new ArrayList<Integer>();
 		ArrayList<Integer>playerGameTime= new ArrayList<Integer>();
 		ArrayList<Integer>playerQuitGameTime= new ArrayList<Integer>();
 	    ArrayList<String>playerQuit = new ArrayList<String>();
-	    ArrayList<Boolean>DisconnectedBefore = new ArrayList<Boolean>();
 	    ArrayList<Integer>playerGametempTime= new ArrayList<Integer>();
 	    ArrayList<Integer>customTime= new ArrayList<Integer>();
 	    ArrayList<Integer>playerQuitCustomTime= new ArrayList<Integer>();
+	   
 	    protected File customConfigFile;
 	    protected FileConfiguration customConfig;
 		 
@@ -83,9 +82,11 @@ public final class timeLimiter  extends JavaPlugin implements Listener, CommandE
 			 for(int confug =0; confug<x; confug++) {
 			playerQuit.add((String) customConfig.get("playerQuit"+confug));
 			int customo =(int) customConfig.get("playerQuitCustomTime"+confug);
-			int tempe= (int) customConfig.get("playerQuitGameTime"+confug); //((Number) obj.get("ipInt")).longValue();
+			int tempe= (int) customConfig.get("playerQuitGameTime"+confug);
+			//((Number) obj.get("ipInt")).longValue();
 			playerQuitGameTime.add(tempe);
 			playerQuitCustomTime.add(customo);
+		
 			 } 
 				 
 			 }
@@ -98,6 +99,7 @@ public final class timeLimiter  extends JavaPlugin implements Listener, CommandE
 				customConfig.set("playerQuit"+reset, null);
 				customConfig.set("playerQuitGameTime"+reset, null);
 				customConfig.set("playerQuitCustomTime"+reset, null);
+				
 				
 			}
 			 try {
@@ -135,16 +137,16 @@ public final class timeLimiter  extends JavaPlugin implements Listener, CommandE
 	    }
 	  @EventHandler
 		public void onPlayerjoin(PlayerJoinEvent e) {
-		Boolean before = true;
+		 before = true;
 		Calendar calendar = Calendar.getInstance();
 		int Timenow= ((calendar.get(Calendar.YEAR)*525600)+((calendar.get(Calendar.MONTH)+1)*43800)+((calendar.get(Calendar.DATE)*1440))+((calendar.get(Calendar.HOUR_OF_DAY)+8)*60)+(calendar.get(Calendar.MINUTE)));
-			System.out.println(Timenow);
+	
 		   playerJoinTemp = e.getPlayer().getDisplayName();
 		 
 			/*ConsoleCommandSender console = Bukkit.getServer().getConsoleSender();
 			String command = "BannEdEqar";
 			Bukkit.dispatchCommand(console, command); */
-		   System.out.println(j);
+		   
 			for(int op=0; op<j; op++) {
 				
 				
@@ -156,12 +158,15 @@ public final class timeLimiter  extends JavaPlugin implements Listener, CommandE
 					
 				
 					playerGametempTime.add(playerQuitGameTime.get(op));
+					System.out.println(playerQuitGameTime.get(op) );
 					customTime.add(playerQuitCustomTime.get(op));
 					playerQuit.remove(op);
 					playerQuitGameTime.remove(op);
+					playerQuitCustomTime.remove(op);
+					
 					j--;
 					System.out.println("someone joined before");
-					DisconnectedBefore.add(true);
+					
 					before = false;
 					
 					
@@ -169,14 +174,13 @@ public final class timeLimiter  extends JavaPlugin implements Listener, CommandE
 				} 
 			}
 			// default
-			playerdata.add(e.getPlayer());
+			
 			playerJoin.add(e.getPlayer().getDisplayName());
 			playerTime.add(Timenow);
 			playerGameTime.add(0);
 			
-			if(before= true) {
+			if(before== true) {
 		    customTime.add(30);
-			DisconnectedBefore.add(false);
 			playerGametempTime.add(0);
 			}
 				
@@ -185,9 +189,7 @@ public final class timeLimiter  extends JavaPlugin implements Listener, CommandE
 			//set so that i can get it in the index section
 			//size
 			i++;
-			System.out.println("Number of users"+" "+i);
-			System.out.println("Number of left"+" "+j);
-			System.out.println("User "+ e.getPlayer().getDisplayName()+" join at  "+ UserJoinedTime);
+			System.out.println("Number of users join"+" "+i+" "+"Number of users left"+" "+j+" "+"User "+ e.getPlayer().getDisplayName()+" join at  "+ UserJoinedTime);
 		    e.getPlayer().sendMessage(ChatColor.GREEN+"Welcome to"+ChatColor.GOLD+" The_Noob's server!"+" "+"and"+ChatColor.UNDERLINE+" SPM "+"is"+" "+ChatColor.RED+spm+" "+ChatColor.ITALIC+"days left! "+ChatColor.BLUE+"Mr "+ChatColor.BOLD+ playerJoin.get(i-1)+" "+"type /counter help to view the commands");
 	       
 			
@@ -207,14 +209,15 @@ public final class timeLimiter  extends JavaPlugin implements Listener, CommandE
 		    			playerQuit.add(quit);
 		    			playerQuitGameTime.add(playerGameTime.get(pop));
 		    			playerQuitCustomTime.add(customTime.get(pop));
+		    		
 		    			j++;
 		    			
 		    			
 		    		    playerJoin.remove(pop);
 		    			playerGameTime.remove(pop);
-		    			playerdata.remove(pop);
+		    			
 		    		    playerTime.remove(pop);
-		    		    DisconnectedBefore.remove(pop);
+		    		
 		    		    playerGametempTime.remove(pop);
 		    		    customTime.remove(pop);
 		    		    
@@ -227,7 +230,7 @@ public final class timeLimiter  extends JavaPlugin implements Listener, CommandE
 	    		
 	    			
 	    		} 
-	    		System.out.println("Number of users"+" "+i+" "+"Number of left"+" "+j);
+	    		
 	    	}
 	    	
 	    	
@@ -248,12 +251,12 @@ public final class timeLimiter  extends JavaPlugin implements Listener, CommandE
 	    			if(k=true) {
 	    				playerJoin.remove(pop);
 		    			playerGameTime.remove(pop);
-		    			playerdata.remove(pop);
+		    			
 		    		    playerTime.remove(pop);
-		    		    DisconnectedBefore.remove(pop);
+		    		    
 		    		    playerGametempTime.remove(pop);
 		    		    customTime.remove(pop);
-		    		    System.out.println(playerGameTime.get(pop) +" banned "+DisconnectedBefore.get(pop));
+		    		    System.out.println(playerGameTime.get(pop) +" banned ");
 		    		    i--;
 		    		    
 	    			}
@@ -262,20 +265,20 @@ public final class timeLimiter  extends JavaPlugin implements Listener, CommandE
 	   }
 	    public void timeComparingInitializer() {
 	    	Calendar tarkov = Calendar.getInstance();
-	        x = true;
+	      
 	    	k = false;
 	    	for(Player p : Bukkit.getServer().getOnlinePlayers()) {
 	    	for(int q=0; q<i; q++) {
 	    		System.out.println("calculating....");
 	    		if(playerJoin.get(q)==p.getPlayer().getDisplayName()) {
 	    			int comparing = 0;
-	    			int currenttime = 0;
+	    			int currenttime = ((tarkov.get(Calendar.YEAR)*525600)+((tarkov.get(Calendar.MONTH)+1)*43800)+((tarkov.get(Calendar.DATE)*1440))+((tarkov.get(Calendar.HOUR_OF_DAY)+8)*60)+(tarkov.get(Calendar.MINUTE)));
 	    			int warning = 0;
-	    			if(x= DisconnectedBefore.get(q)) {
+	    			if(playerGametempTime.get(q)>0) {
 	    				comparing+= playerGametempTime.get(q);
 	    				
 	    			}
-	    			     currenttime = ((tarkov.get(Calendar.YEAR)*525600)+((tarkov.get(Calendar.MONTH)+1)*43800)+((tarkov.get(Calendar.DATE)*1440))+((tarkov.get(Calendar.HOUR_OF_DAY)+8)*60)+(tarkov.get(Calendar.MINUTE)));
+	    			     
 	    				comparing += currenttime-playerTime.get(q);
 		    			System.out.println(playerJoin.get(q)+" has a game time of "+comparing);
 		    			playerGameTime.set(q, comparing);
@@ -462,6 +465,7 @@ public final class timeLimiter  extends JavaPlugin implements Listener, CommandE
 				customConfig.set("playerQuit"+cfg, playerQuit.get(cfg));
 				customConfig.set("playerQuitGameTime"+cfg, playerQuitGameTime.get(cfg));
 				customConfig.set("playerQuitCustomTime"+cfg, playerQuitCustomTime.get(cfg));
+				
 			}
 	    	 try {
 					customConfig.save(customConfigFile);
