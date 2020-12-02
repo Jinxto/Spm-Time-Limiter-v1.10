@@ -10,7 +10,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
-
+import java.util.concurrent.TimeUnit;
 
 import org.bukkit.BanList;
 
@@ -38,6 +38,13 @@ import org.bukkit.configuration.file.YamlConfiguration;
 public final class timeLimiter  extends JavaPlugin implements Listener, CommandExecutor{
 	    int i;  //for event handler connected
 	    int j; //for event handler disconnected
+	    int resetdata; //iterator for data resettting
+	    int movedata; //iterator for moving data
+	    int someonejoin; // iterator for didsomeonejoined?
+	    int leftarator; // iterator for someone who left
+	    int kicked; //iterator for someone who got kicked
+	    int comparator; // iterator for comparing
+	    String rip; // string for storing kicked name
 	    boolean k;
 		String quit;
 		boolean before;
@@ -79,35 +86,14 @@ public final class timeLimiter  extends JavaPlugin implements Listener, CommandE
 			if(x>0) {
 			 j=x;
 			 System.out.println("moving data.....");
-			 for(int confug =0; confug<x; confug++) {
-			playerQuit.add((String) customConfig.get("playerQuit"+confug));
-			int customo =(int) customConfig.get("playerQuitCustomTime"+confug);
-			int tempe= (int) customConfig.get("playerQuitGameTime"+confug);
-			//((Number) obj.get("ipInt")).longValue();
-			playerQuitGameTime.add(tempe);
-			playerQuitCustomTime.add(customo);
-		
-			 } 
+			 movingCustomConfigData(movedata,x);
 				 
 			 }
 		  }
 		  if(!datae.equals(previousDate)) {
 			 System.out.println(datae+" is not equal to"+" "+previousDate+" clearing offline memory......");
-			   customConfig.set("numbers of quitted", 0);
-	    	   customConfig.set("date", null);
-		  for(int reset=0; reset<x; reset++) {
-				customConfig.set("playerQuit"+reset, null);
-				customConfig.set("playerQuitGameTime"+reset, null);
-				customConfig.set("playerQuitCustomTime"+reset, null);
-				
-				
-			}
-			 try {
-					customConfig.save(customConfigFile);
-				} catch (IOException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-			}
+	    	
+		     resetCustomConfig(resetdata,x);
 		 }
 	//	getServer().getPluginManager().registerEvents(new events(), this);
 		  getCommand("spm").setExecutor(new commando());
@@ -147,33 +133,7 @@ public final class timeLimiter  extends JavaPlugin implements Listener, CommandE
 			String command = "BannEdEqar";
 			Bukkit.dispatchCommand(console, command); */
 		   
-			for(int op=0; op<j; op++) {
-				
-				
-				
-				// for player name get index and insert into player game time
-				String playerComparing =playerQuit.get(op);
-				
-				if(playerJoinTemp.equals(playerComparing)) {
-					
-				
-					playerGametempTime.add(playerQuitGameTime.get(op));
-					System.out.println(playerQuitGameTime.get(op) );
-					customTime.add(playerQuitCustomTime.get(op));
-					playerQuit.remove(op);
-					playerQuitGameTime.remove(op);
-					playerQuitCustomTime.remove(op);
-					
-					j--;
-					System.out.println("someone joined before");
-					
-					before = false;
-					
-					
-					
-				} 
-			}
-			// default
+		    someoneJoined(someonejoin,j);
 			
 			playerJoin.add(e.getPlayer().getDisplayName());
 			playerTime.add(Timenow);
@@ -189,8 +149,10 @@ public final class timeLimiter  extends JavaPlugin implements Listener, CommandE
 			//set so that i can get it in the index section
 			//size
 			i++;
+			timeComparingInitializer();
 			System.out.println("Number of users join"+" "+i+" "+"Number of users left"+" "+j+" "+"User "+ e.getPlayer().getDisplayName()+" join at  "+ UserJoinedTime);
-		    e.getPlayer().sendMessage(ChatColor.GREEN+"Welcome to"+ChatColor.GOLD+" The_Noob's server!"+" "+"and"+ChatColor.UNDERLINE+" SPM "+"is"+" "+ChatColor.RED+spm+" "+ChatColor.ITALIC+"days left! "+ChatColor.BLUE+"Mr "+ChatColor.BOLD+ playerJoin.get(i-1)+" "+"type /counter help to view the commands");
+		    e.getPlayer().sendMessage(ChatColor.GREEN+"Welcome to"+ChatColor.GOLD+" The_Noob's server!"+" "+"and"+ChatColor.UNDERLINE+" SPM "+"is"+" "+ChatColor.RED+spm+" "+ChatColor.ITALIC+"days left! "+ChatColor.BLUE+"Mr "+ChatColor.BOLD+ playerJoin.get(i-1)+" "+"type /counter help to view the commands" +" "+"PLEASE DO NOT QUIT AFTER JOINING LESS THAN 60 SECONDS, cause this is stressing potato laptop functionality");
+		    
 	       
 			
 	}
@@ -200,37 +162,9 @@ public final class timeLimiter  extends JavaPlugin implements Listener, CommandE
 		   
 	    	quit = e.getPlayer().getDisplayName();
 	    	System.out.println(quit);
-	    	
-	    	for(int pop=0; pop<i; pop++) {
-	    		if(playerJoin.get(pop)== quit) {
-	    			if(k!=true) {
-	    				System.out.println("user "+playerJoin.get(pop)+ " disconnected early, saving data for rejoining purpose...");
-		    			
-		    			playerQuit.add(quit);
-		    			playerQuitGameTime.add(playerGameTime.get(pop));
-		    			playerQuitCustomTime.add(customTime.get(pop));
-		    		
-		    			j++;
-		    			
-		    			
-		    		    playerJoin.remove(pop);
-		    			playerGameTime.remove(pop);
-		    			
-		    		    playerTime.remove(pop);
-		    		
-		    		    playerGametempTime.remove(pop);
-		    		    customTime.remove(pop);
-		    		    
-		    			
-		    			
-		    			i--;
-	    			}
-	    			
-	    			}
-	    		
-	    			
-	    		} 
-	    		
+	    	if(k!=true) {
+	        someoneLeft(leftarator,i); 
+	   } 		
 	    	}
 	    	
 	    	
@@ -245,79 +179,16 @@ public final class timeLimiter  extends JavaPlugin implements Listener, CommandE
 	    
 	   @EventHandler
 	   public void onPlayerKicked(PlayerKickEvent e) {
+		
+		 if(k=true) {
+			  gotKicked(kicked,i); 
 		  
-		   for(int pop=0; pop<i; pop++) {
-	    		if(playerJoin.get(pop)== quit) {
-	    			if(k=true) {
-	    				playerJoin.remove(pop);
-		    			playerGameTime.remove(pop);
-		    			
-		    		    playerTime.remove(pop);
-		    		    
-		    		    playerGametempTime.remove(pop);
-		    		    customTime.remove(pop);
-		    		    System.out.println(playerGameTime.get(pop) +" banned ");
-		    		    i--;
-		    		    
-	    			}
-	   }
-  }
+		 }
+         
 	   }
 	    public void timeComparingInitializer() {
-	    	Calendar tarkov = Calendar.getInstance();
-	      
-	    	k = false;
-	    	for(Player p : Bukkit.getServer().getOnlinePlayers()) {
-	    	for(int q=0; q<i; q++) {
-	    		System.out.println("calculating....");
-	    		if(playerJoin.get(q)==p.getPlayer().getDisplayName()) {
-	    			int comparing = 0;
-	    			int currenttime = ((tarkov.get(Calendar.YEAR)*525600)+((tarkov.get(Calendar.MONTH)+1)*43800)+((tarkov.get(Calendar.DATE)*1440))+((tarkov.get(Calendar.HOUR_OF_DAY)+8)*60)+(tarkov.get(Calendar.MINUTE)));
-	    			int warning = 0;
-	    			if(playerGametempTime.get(q)>0) {
-	    				comparing+= playerGametempTime.get(q);
-	    				
-	    			}
-	    			     
-	    				comparing += currenttime-playerTime.get(q);
-		    			System.out.println(playerJoin.get(q)+" has a game time of "+comparing);
-		    			playerGameTime.set(q, comparing);
-	    			
-		    		 warning = customTime.get(q)- playerGameTime.get(q);
-		    		 if(warning == 180) {
-		    			 p.getPlayer().sendMessage(ChatColor.GREEN+"You have"+" "+ChatColor.GREEN+"3 hours left before ban");
-		    		 }
-		    		 if(warning == 120) {
-		    			 p.getPlayer().sendMessage(ChatColor.GREEN+"You have"+" "+ChatColor.GREEN+"2 hours left before ban");
-		    		 }
-		    		 if(warning == 60){
-		    			 p.getPlayer().sendMessage(ChatColor.GREEN+"You have"+" "+ChatColor.GREEN+"1 hours left before ban");
-		    		 }
-		    		 if(warning == 30){
-		    			 p.getPlayer().sendMessage(ChatColor.GREEN+"You have"+" "+ChatColor.GREEN+"30 minutes left before ban");
-		    		 }
-		    		 if(warning == 10) {
-		    			 p.getPlayer().sendMessage(ChatColor.GREEN+"You have"+" "+ChatColor.YELLOW+"10 minutes left before ban");
-		    		 }
-		    		 if(warning == 5) {
-		    			 p.getPlayer().sendMessage(ChatColor.GREEN+"You have"+" "+ChatColor.RED+"5 minutes left before ban");
-		    		 }
-		    		 if(warning == 1){
-		    			 p.getPlayer().sendMessage(ChatColor.GREEN+"You have"+" "+ChatColor.RED+ChatColor.BOLD+"1 minutes left before ban");
-		    		 }
-	    			
-	    			if(playerGameTime.get(q)>=customTime.get(q)) {
-	    				System.out.println("Game Time Reached for User"+" "+p.getPlayer().getDisplayName()+" "+", intializing ban");
-	    				
-	    				banName(p.getPlayer().getDisplayName(),ChatColor.MAGIC+"asdasdasdasd"+" "+ChatColor.GREEN+"Im sorry to say that you need to go back to study because"+" "+ChatColor.BOLD+"SPM"+" is "+" "+ChatColor.RED+spm+" "+ChatColor.AQUA+"days left!"+" "+ChatColor.GOLD+"come back tommorrow!",playerJoin.get(q)+""+ChatColor.MAGIC+" asdasdasdasdasdasdasda");
-	    				p.getPlayer().kickPlayer(ChatColor.MAGIC+"asdasdasdasd "+ChatColor.GREEN+"Tik Tok "+ChatColor.DARK_GRAY+ "Tik Tok "+ChatColor.RED+" SPM"+ChatColor.DARK_PURPLE+" is around the door,"+ChatColor.YELLOW+" better study "+ChatColor.RED+spm+" "+"day before,"+" "+ChatColor.BOLD+"so you won't regret no more!"+ChatColor.MAGIC+" asdasdasdasdasdasdasda");
-	    				k = true;
-	    				
-	    			}
-	    		}
-	    	}
+	         calculating(comparator,i);
 	    	
-	    }
 	   } 
 	   public void banName(String name, String reason, String source) {
 	    	Date dt = new Date(System.currentTimeMillis()+24*60*60*1000);
@@ -455,6 +326,189 @@ public final class timeLimiter  extends JavaPlugin implements Listener, CommandE
 	 }
 	   	return false;
 	   }
+	   public void resetCustomConfig(int recur, int limit) {
+		   customConfig.set("numbers of quitted", 0);
+    	   customConfig.set("date", null);
+		   if(recur<limit) {
+			   customConfig.set("playerQuit"+recur, null);
+			   customConfig.set("playerQuitGameTime"+recur, null);
+			   customConfig.set("playerQuitCustomTime"+recur, null);
+			   resetdata++;
+			   resetCustomConfig(resetdata,limit);
+			 
+			   
+		   }
+		   if(resetdata==recur) {
+			   resetdata=0;
+		   }
+		   try {
+				customConfig.save(customConfigFile);
+			} catch (IOException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+		}
+	 }
+	   public void movingCustomConfigData(int x,int xa) {
+		   if(x<xa) {
+			   playerQuit.add((String) customConfig.get("playerQuit"+x));
+				int customo =(int) customConfig.get("playerQuitCustomTime"+x);
+				int tempe= (int) customConfig.get("playerQuitGameTime"+x);
+				//((Number) obj.get("ipInt")).longValue();
+				playerQuitGameTime.add(tempe);
+				playerQuitCustomTime.add(customo);
+				movedata++;
+				movingCustomConfigData(movedata,xa);
+				
+			   
+		   }
+		   if(movedata==xa) {
+			   movedata=0;
+		   }
+		   
+	   }
+	   public void someoneJoined(int join, int x) {
+		   if(join<x) {
+			   
+		   
+			String playerComparing =playerQuit.get(join);
+			
+			if(playerJoinTemp.equals(playerComparing)) {
+				
+			
+				playerGametempTime.add(playerQuitGameTime.get(join));
+				System.out.println(playerQuitGameTime.get(join));
+				customTime.add(playerQuitCustomTime.get(join));
+				playerQuit.remove(join);
+				playerQuitGameTime.remove(join);
+				playerQuitCustomTime.remove(join);
+				
+				j--;
+				System.out.println("someone joined before");
+				
+				before = false;
+				
+			}
+			    someonejoin++;
+				someoneJoined(someonejoin,x);
+			}if(someonejoin==x) {
+				someonejoin=0;
+			}
+		   
+	   }
+	   public void someoneLeft(int kl, int x) {
+		   if(kl<x) {
+			   if(playerJoin.get(kl)== quit) {
+	    			if(k!=true) {
+	    				System.out.println("user "+playerJoin.get(kl)+ " disconnected early, saving data for rejoining purpose...");
+		    			
+		    			playerQuit.add(quit);
+		    			playerQuitGameTime.add(playerGameTime.get(kl));
+		    			playerQuitCustomTime.add(customTime.get(kl));
+		    		
+		    			j++;
+		    			
+		    			
+		    		    playerJoin.remove(kl);
+		    			playerGameTime.remove(kl);
+		    			
+		    		    playerTime.remove(kl);
+		    		
+		    		    playerGametempTime.remove(kl);
+		    		    customTime.remove(kl);
+		    		    
+		    			
+		    			
+		    			i--;
+	    			}
+	    			
+	    			
+	    			}
+			   leftarator++;
+			   someoneLeft(leftarator, x);
+			   
+			   
+		   }
+		   if(leftarator==x) {
+			   leftarator=0;
+		   }
+		   
+	   }
+	   public void gotKicked(int kik,int x) {
+           if(kik<x) {
+       		if(playerJoin.get(kik)== quit) {
+    			if(k=true) {
+    				playerJoin.remove(kik);
+	    			playerGameTime.remove(kik);
+	    			
+	    		    playerTime.remove(kik);
+	    		    
+	    		    playerGametempTime.remove(kik);
+	    		    customTime.remove(kik);
+	    		    System.out.println(playerGameTime.get(kik) +" banned ");
+	    		    i--;
+	    		    
+    			}
+   }           kicked++;
+               gotKicked(kicked,x);
+            }if(kicked==x) {
+            	kicked=0;
+            }
+          
+	   }
+	   public void calculating(int x, int y) {
+			Calendar tarkov = Calendar.getInstance();
+		      
+	    	k = false;	
+	    	if(x<y) {
+	    	for(Player p : Bukkit.getServer().getOnlinePlayers()) {
+	    	
+	    		
+
+	    		System.out.println("calculating....");
+	    		if(playerJoin.get(x)==p.getPlayer().getDisplayName()) {
+	    			int comparing = 0;
+	    			int currenttime = ((tarkov.get(Calendar.YEAR)*525600)+((tarkov.get(Calendar.MONTH)+1)*43800)+((tarkov.get(Calendar.DATE)*1440))+((tarkov.get(Calendar.HOUR_OF_DAY)+8)*60)+(tarkov.get(Calendar.MINUTE)));
+	    			int warning = 0;
+	    			if(playerGametempTime.get(x)>0) {
+	    				comparing+= playerGametempTime.get(x);
+	    				
+	    			}
+	    			     
+	    				comparing += currenttime-playerTime.get(x);
+		    			System.out.println(playerJoin.get(x)+" has a game time of "+comparing);
+		    			playerGameTime.set(x, comparing);
+	    			
+		    		 warning = customTime.get(x)- playerGameTime.get(x);
+		    		
+		    		 if(warning == 1){
+		    			 p.getPlayer().sendMessage(ChatColor.GREEN+"You have"+" "+ChatColor.RED+ChatColor.BOLD+"1 minutes left before ban");
+		    			
+		    		 }
+	    			
+	    			if(playerGameTime.get(x)>=customTime.get(x)) {
+	    				System.out.println("Game Time Reached for User"+" "+p.getPlayer().getDisplayName()+" "+", intializing ban");
+	    				
+	    				banName(p.getPlayer().getDisplayName(),ChatColor.MAGIC+"asdasdasdasd"+" "+ChatColor.GREEN+"Im sorry to say that you need to go back to study because"+" "+ChatColor.BOLD+"SPM"+" is "+" "+ChatColor.RED+spm+" "+ChatColor.AQUA+"days left!"+" "+ChatColor.GOLD+"come back tommorrow!",playerJoin.get(x)+""+ChatColor.MAGIC+" asdasdasdasdasdasdasda");
+	    				p.getPlayer().kickPlayer(ChatColor.MAGIC+"asdasdasdasd "+ChatColor.GREEN+"Tik Tok "+ChatColor.DARK_GRAY+ "Tik Tok "+ChatColor.RED+" SPM"+ChatColor.DARK_PURPLE+" is around the door,"+ChatColor.YELLOW+" better study "+ChatColor.RED+spm+" "+"day before,"+" "+ChatColor.BOLD+"so you won't regret no more!"+ChatColor.MAGIC+" asdasdasdasdasdasdasda");
+	    				k = true;
+	    				
+	    			}
+	    		}
+	    	}
+	    	
+	    	comparator++;
+	    	calculating(comparator, y);
+	    	
+	    }if(comparator==y) {
+	    	comparator=0;
+	    }
+	    	
+	    	
+	   }
+	
+	   
+		   
+	   
 	   
 	    @Override   //need to save date too btw
 	    public void onDisable() {
