@@ -10,8 +10,6 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.concurrent.TimeUnit;
-
 import org.bukkit.BanList;
 
 import org.bukkit.Bukkit;
@@ -44,6 +42,7 @@ public final class timeLimiter  extends JavaPlugin implements Listener, CommandE
 	    int leftarator; // iterator for someone who left
 	    int kicked; //iterator for someone who got kicked
 	    int comparator; // iterator for comparing
+	    int disable; // iterator for saving data
 	    String rip; // string for storing kicked name
 	    boolean k;
 		String quit;
@@ -109,7 +108,7 @@ public final class timeLimiter  extends JavaPlugin implements Listener, CommandE
 		    	  
 		       
 		       }
-		   }.runTaskTimer(this, 1200L, 1200L); //Delays in ticks
+		   }.runTaskTimer(this, 3600L, 3600L); //Delays in ticks
 	
 	 
 		
@@ -302,18 +301,10 @@ public final class timeLimiter  extends JavaPlugin implements Listener, CommandE
 	   					for(int commande = 0; commande<i; commande++) {
 	   						if(((Player) sender).getPlayer().getDisplayName()== playerJoin.get(commande)) {
 	   							
-	   							int ol =(customTime.get(commande)%(60));
-	   							int oll =(customTime.get(commande)/(60));
-	   							int molll = 0;
-	   							if(ol!=0) {
-	   								molll=  (customTime.get(commande));
-	   								if(molll>=60) {
-	   									molll = 0;
-	   								
-	   							}
+	   						
+	   							yourTime(customTime.get(commande), 0, sender);
+	   						
 	   							
-	   						}
-	   							sender.sendMessage("Your custom game time is "+oll+" hours "+molll+" minutes ");
 	   							
 	   		
 	   					}
@@ -504,7 +495,45 @@ public final class timeLimiter  extends JavaPlugin implements Listener, CommandE
 	    }
 	    	
 	    	
+	   } 
+	   public void disablee(int x, int y) {
+		   System.out.println("saving data");
+    	   customConfig.set("numbers of quitted", j);
+    	   customConfig.set("date", datae);
+    	
+		   if(x<y) {
+			   customConfig.set("playerQuit"+x, playerQuit.get(x));
+				customConfig.set("playerQuitGameTime"+x, playerQuitGameTime.get(x));
+				customConfig.set("playerQuitCustomTime"+x, playerQuitCustomTime.get(x));
+				disable++;
+				disablee(disable,y);
+		   }
+		   if(x==y) {
+			   disable=0;
+		   }
+		   try {
+				customConfig.save(customConfigFile);
+			} catch (IOException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+		}
+   	
+   	
+       
+   }
+	   public void yourTime(int x, int y, CommandSender sender) {
+		  
+		   
+		   if(x>=60) {
+			   x = x-60;
+			   y++;
+			yourTime(x,y, sender);
+			   
+		   }
+		   sender.sendMessage("Your custom game time is "+y+" hours "+x+" minutes ");
+		 
 	   }
+	   
 	
 	   
 		   
@@ -512,21 +541,8 @@ public final class timeLimiter  extends JavaPlugin implements Listener, CommandE
 	   
 	    @Override   //need to save date too btw
 	    public void onDisable() {
-	    	System.out.println("saving data");
-	    	   customConfig.set("numbers of quitted", j);
-	    	   customConfig.set("date", datae);
-	    	for(int cfg=0; cfg<j; cfg++) {
-				customConfig.set("playerQuit"+cfg, playerQuit.get(cfg));
-				customConfig.set("playerQuitGameTime"+cfg, playerQuitGameTime.get(cfg));
-				customConfig.set("playerQuitCustomTime"+cfg, playerQuitCustomTime.get(cfg));
-				
-			}
-	    	 try {
-					customConfig.save(customConfigFile);
-				} catch (IOException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-			}
+	    	disablee(disable,j);
+	    	
 	    	
 	    	getLogger().info("PluginDisabled");
 	        // TODO Insert logic to be performed when the plugin is disabled
